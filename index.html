@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="favicon.png" type="images/x-icon">
+    <title>Fancy Weather</title>
+    <link href="assets/style/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,700i&display=swap&subset=cyrillic" rel="stylesheet">
+</head>
+
+<body>
+    <div class="control-unit">
+        <div class="control-unit__buttons">
+            <button class="button control-unit__button-update">
+                <div class="control-unit__spinner"></div>
+            </button>
+            <div class="control-unit__language-menu">
+                <button class="button control-unit__language-menu__button">
+                    <span>en</span>
+                    <span class="button__arrow-down"></span>
+                </button>
+                <div class="control-unit__down-menu">
+                    <button class="control-unit__down-menu__item button" id="en">en</button>
+                    <button class="control-unit__down-menu__item button inactive" id="ru">ru</button>
+                    <button class="control-unit__down-menu__item button inactive" id="be">be</button>
+                </div>
+            </div>
+            <button class="button control-unit__buttons-f inactive">°F</button>
+            <button class="button control-unit__buttons-c">°C</button>
+        </div>
+        <div class="control-unit__search-input">
+            <input class="control-unit__search-input-input" type="search" name="search-city" required="" placeholder="Search city or ZIP">
+            <button class="button control-unit__search-input__button">Search</button>
+            <button class="control-unit__search-input__voice-button"></button>
+        </div>
+    </div>
+</body>
+
+</html>
