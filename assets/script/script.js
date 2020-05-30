@@ -103,7 +103,75 @@ const weatherIcons = {
         t04d: 'assets/img/wheather-icons/thunderstorms.svg',
         t04n: 'assets/img/wheather-icons/thunderstorms.svg'
     }
-  };
+};
+
+const translations = {
+    "en": 
+    {
+        "searchInput": "Search city or ZIP",
+        "searchButton": "search",
+        "apparentTemperature": "feels like:",
+        "windSpeed": "wind speed::",
+        "airHumidity": "Humidity:"
+    },
+
+"ru":
+    {
+        "searchInput": "Найти город или индекс",
+        "searchButton": "поиск",
+        "apparentTemperature": "ощущается как:",
+        "windSpeed": "скорость ветра:",
+        "airHumidity": "влажность:"
+    },
+    
+"be": 
+    {
+        "searchInput": "Знайсці горад ці індэкс",
+        "searchButton": "пошук",
+        "apparentTemperature": "адчуваецца як:",
+        "windSpeed": "хуткасць ветру:",
+        "airHumidity": "вільготнасць:",
+        "days": 
+            {
+                "long":
+                    [
+                        'нядзеля', 
+                        'панядзелак', 
+                        'аўторак', 
+                        'серада', 
+                        'чацвер', 
+                        'пятніца', 
+                        'субота'
+                    ],
+                "short":
+                    [
+                        'няд', 
+                        'пнд', 
+                        'аўт', 
+                        'сер', 
+                        'чцв', 
+                        'пят', 
+                        'суб'
+                    ]
+            },
+            
+        "month": 
+            [
+                'Студзень', 
+                'Люты', 
+                'Сакавiк', 
+                'Красавiк', 
+                'Май', 
+                'Чэрвень', 
+                'Лiпень', 
+                'Жнiвень', 
+                'Верасень', 
+                'Кастрычнiк', 
+                'Лiстапад', 
+                'Снежань'
+            ]
+    }
+}
 
 const LANGUAGE_MENU = document.querySelector('.control-unit__language-menu__button');
 const LANGUAGE_MENU_BTN = document.querySelector('.control-unit__language-menu__button');
@@ -126,6 +194,9 @@ const CLOCK = document.querySelector('.weather-data-cluster__clock');
 const ICON_WEATHER = document.querySelector('.weather-data-cluster__weather-icon');
 const DESCRIPTION_WEATHER = document.querySelector('#descriptionWeather');
 const VALUE_APPARENT = document.querySelector('#degreesValueApparent');
+const FEELS_TMP = document.querySelector('#apparentTemperature');
+const WIND_SPEED = document.querySelector('#windSpeed');
+const AIR_HUMIDITY = document.querySelector('#airHumidity');
 const VALUE_SPEED = document.querySelector('#valueSpeed');
 const VALUE_HUMIDITY = document.querySelector('#valueHumidity');
 const CITY = document.querySelector('.weather-data-cluster__location');
@@ -133,13 +204,39 @@ const SEARCH_INPUT = document.querySelector('.control-unit__search-input-input')
 const SEARCH_BTN = document.querySelector('.control-unit__search-input__button');
 const ADVICE_FORM = document.querySelector('.control-unit__search-input__advice');
 let units = localStorage.getItem('units') === null ? 'M' : localStorage.getItem('units');
+let language = localStorage.getItem('lang') === null ? 'en' : localStorage.getItem('lang');
 
-if(units === 'I') {
+if (units === 'I') {
     F_BTN.classList.remove('inactive');
     C_BTN.classList.add('inactive');
 } else {
     C_BTN.classList.remove('inactive');
     F_BTN.classList.add('inactive');
+}
+
+function getTranslations(language) {
+    SEARCH_INPUT.placeholder = translations[language].searchInput;
+    SEARCH_BTN.innerHTML = translations[language].searchButton;
+    FEELS_TMP.innerHTML = translations[language].apparentTemperature;
+    WIND_SPEED.innerHTML = translations[language].windSpeed;
+    AIR_HUMIDITY.innerHTML = translations[language].airHumidity;
+}
+
+if(language === 'en') {
+    DOWN_MENU_ITEM.forEach(el => el.classList.add('inactive'));
+    DOWN_MENU_ITEM[0].classList.remove('inactive');
+    document.querySelector('#current-language').innerHTML = 'en';
+    getTranslations("en");
+} else if(language === 'ru') {
+    DOWN_MENU_ITEM.forEach(el => el.classList.add('inactive'));
+    DOWN_MENU_ITEM[1].classList.remove('inactive');
+    document.querySelector('#current-language').innerHTML = 'ru';
+    getTranslations("ru");
+} else {
+    DOWN_MENU_ITEM.forEach(el => el.classList.add('inactive'));
+    DOWN_MENU_ITEM[2].classList.remove('inactive');
+    document.querySelector('#current-language').innerHTML = 'be';
+    getTranslations("be");
 }
 
 SEARCH_BTN.addEventListener('click', () => {
@@ -149,13 +246,13 @@ SEARCH_BTN.addEventListener('click', () => {
 });
 
 SEARCH_INPUT.addEventListener('keydown', (event) => {
- if(event.keyCode === 13) {
-    event.preventDefault();
+    if (event.keyCode === 13) {
+        event.preventDefault();
 
-    getDateCity();
-    getLinkToImage();
-    getMap();
- }
+        getDateCity();
+        getLinkToImage();
+        getMap();
+    }
 });
 
 LANGUAGE_MENU.addEventListener('click', () => {
@@ -165,34 +262,44 @@ LANGUAGE_MENU.addEventListener('click', () => {
 });
 
 DOWN_MENU.addEventListener('click', (event) => {
+    let loc = JSON.parse(localStorage.getItem("PlaceLocation"));
+    let units = localStorage.getItem('units') === null ? 'M' : localStorage.getItem('units');
     DOWN_MENU_ITEM.forEach(el => el.classList.add('inactive'));
     event.target.classList.remove('inactive');
     localStorage.setItem('lang', event.target.innerHTML);
     document.querySelector('#current-language').innerHTML = event.target.innerHTML;
+    SEARCH_INPUT.placeholder = translations[event.target.textContent].searchInput;
+    SEARCH_BTN.innerHTML = translations[event.target.textContent].searchButton;
+    FEELS_TMP.innerHTML = translations[event.target.textContent].apparentTemperature;
+    WIND_SPEED.innerHTML = translations[event.target.textContent].windSpeed;
+    AIR_HUMIDITY.innerHTML = translations[event.target.textContent].airHumidity;
+    
+    getMap();
+    getWeatherData(units, loc);
 });
 
 F_BTN.addEventListener('click', () => {
-    if(F_BTN.classList.contains('inactive')) {
+    if (F_BTN.classList.contains('inactive')) {
         F_BTN.classList.remove('inactive');
         C_BTN.classList.add('inactive');
         localStorage.setItem('units', 'I');
-        let loc = JSON.parse (localStorage.getItem ("PlaceLocation"));
+        let loc = JSON.parse(localStorage.getItem("PlaceLocation"));
         getWeatherData('I', loc);
     }
 });
 
 C_BTN.addEventListener('click', () => {
-    if(C_BTN.classList.contains('inactive')) {
+    if (C_BTN.classList.contains('inactive')) {
         C_BTN.classList.remove('inactive');
         F_BTN.classList.add('inactive');
         localStorage.setItem('units', 'M');
-        let loc = JSON.parse (localStorage.getItem ("PlaceLocation"));
+        let loc = JSON.parse(localStorage.getItem("PlaceLocation"));
         getWeatherData('M', loc);
     }
 });
 
 UPDATE_BTN.addEventListener('click', () => {
-    SPINNER.style.animation = 'none'; 
+    SPINNER.style.animation = 'none';
     getLinkToImage();
     SPINNER.offsetHeight;
     SPINNER.style.animation = null;
@@ -203,27 +310,27 @@ async function getLinkToImage() {
     const res = await fetch(url);
     const data = await res.json();
     document.querySelector('body').style = `background: linear-gradient(180deg, rgba(8,15,26,.59), rgba(17,17,46,.46)) 50% fixed, url(${data.urls.regular}) no-repeat 50% fixed; background-size: cover`;
-  };
+};
 
-  async function getUserGeolocation() {
+async function getUserGeolocation() {
     const url = 'https://ipinfo.io/json?token=b150ba1fba3f8c';
     const res = await fetch(url);
     const data = await res.json();
     let coordinates = data.loc.split(',');
     return coordinates;
-  };
+};
 
-  async function getMap() {
+async function getMap() {
     let cityName = getValueInput();
     let language = localStorage.getItem('lang') === null ? 'en' : localStorage.getItem('lang');
-    if(cityName === '') {
+    if (cityName === '') {
         let coordinates = await getUserGeolocation();
         var loc = coordinates.join(',');
         var latitude = ConvertDDToDMS(coordinates[0]);
         var longitude = ConvertDDToDMS(coordinates[1]);
     } else {
         let coordinates = await getCoordinatesPlace(cityName);
-        if(coordinates !== 'no result') {
+        if (coordinates !== 'no result') {
             var loc = `${coordinates.lat},${coordinates.lng}`;
             var latitude = ConvertDDToDMS(coordinates.lat);
             var longitude = ConvertDDToDMS(coordinates.lng);
@@ -231,71 +338,71 @@ async function getLinkToImage() {
             return 'no result';
         }
     }
-    if(language === 'en') {
+    if (language === 'en') {
         LATITUDE.innerHTML = `Latitude: ${latitude}`;
         LONGITUDE.innerHTML = `Longitude: ${longitude}`;
-    } else if(language === 'ru') {
+    } else if (language === 'ru') {
         LATITUDE.innerHTML = `Широта: ${latitude}`;
         LONGITUDE.innerHTML = `Долгота: ${longitude}`;
     } else {
         LATITUDE.innerHTML = `Шырата: ${latitude}`;
         LONGITUDE.innerHTML = `Даўгата: ${longitude}`;
     }
-    
-    MAP.setAttribute('src', `https://www.google.com/maps/embed/v1/view?center=${loc}&zoom=10&key=AIzaSyBWWZnqHV3asW7DM3yCQ0dxSHjj_J9LkwE&language=${language}`);
-  }
-  getMap();
 
-  async function getCoordinatesPlace(city) {
+    MAP.setAttribute('src', `https://www.google.com/maps/embed/v1/view?center=${loc}&zoom=10&key=AIzaSyBWWZnqHV3asW7DM3yCQ0dxSHjj_J9LkwE&language=${language}`);
+}
+getMap();
+
+async function getCoordinatesPlace(city) {
     const url = `https://api.opencagedata.com/geocode/v1/json?q=${city}&key=461a5319b8ab435dadb02959bf0bc967&pretty=1&no_annotations=1`;
     const res = await fetch(url);
     const data = await res.json();
-    if(data.results.length === 0) {
+    if (data.results.length === 0) {
         return 'no result'
     } else {
         return data.results[0].geometry;
     }
-  }
+}
 
-  async function getCityName(loc, language) {
+async function getCityName(loc, language) {
     const url = `https://api.opencagedata.com/geocode/v1/json?q=${loc}&key=461a5319b8ab435dadb02959bf0bc967&language=${language}&pretty=1&no_annotations=1&abbrv=1`;
     const res = await fetch(url);
     const data = await res.json();
     let cityName;
-    if(data.results[0].components.village !== undefined) {
+    if (data.results[0].components.village !== undefined) {
         cityName = data.results[0].components.village;
-    } else if(data.results[0].components.town !== undefined) {
+    } else if (data.results[0].components.town !== undefined) {
         cityName = data.results[0].components.town;
     } else {
-    cityName = data.results[0].components.city;
+        cityName = data.results[0].components.city;
     }
     return (`${cityName}, ${data.results[0].components.country}`);
-  }
- 
-  async function getWeatherData(units, loc) {
+}
+
+async function getWeatherData(units, loc) {
     let language = localStorage.getItem('lang') === null ? 'en' : localStorage.getItem('lang');
 
-    if(!loc) {
+    if (!loc) {
         var lat = lon = await getUserGeolocation();
         let loc = {
             lat: lat[0],
             lng: lat[1]
         }
-        localStorage.setItem ("PlaceLocation", JSON.stringify(loc));
+        localStorage.setItem("PlaceLocation", JSON.stringify(loc));
     } else {
         var lat = lon = [loc.lat, loc.lng];
     }
-    
+
     let city = await getCityName((lat.join(',')), language);
     CITY.innerHTML = `${city}`;
     var unitSpeed;
-    if(units === 'M') {
+    if (units === 'M') {
         unitSpeed = language === 'en' ? 'm/s' : 'м/с';
     } else {
-        if(language === 'en') {
+        if (language === 'en') {
             unitSpeed = 'mph';
-        } else if(language === 'ru') {
-             unitSpeed = 'миль в час';
+        } else if (language === 'ru') {
+            unitSpeed = 'миль в час';
         } else {
             unitSpeed = 'міль у гадзіну';
         }
@@ -305,11 +412,11 @@ async function getLinkToImage() {
     const data = await res.json();
 
     let dateTime = [
-        data.data[0].datetime, 
-        data.data[1].datetime, 
+        data.data[0].datetime,
+        data.data[1].datetime,
         data.data[2].datetime,
         data.data[3].datetime
-        ];
+    ];
     localStorage.setItem('dateTime', dateTime);
 
     getDate();
@@ -326,7 +433,7 @@ async function getLinkToImage() {
     VALUE_APPARENT.innerHTML = `${Math.round(appTemperature)}°`;
     VALUE_SPEED.innerHTML = `${Math.round(data.data[0].wind_spd)} ${unitSpeed}`;
     VALUE_HUMIDITY.innerHTML = `${data.data[0].rh}%`;
-    
+
     try {
         ICON_WEATHER.src = weatherIcons[codeWeather][iconWeather];
         ICON_WEATHER.alt = description;
@@ -344,7 +451,7 @@ async function getLinkToImage() {
     }
 
     try {
-        FORECAST_DAF.querySelector('.forecast__icon').src =  weatherIcons[data.data[2].weather.code][data.data[2].weather.icon];
+        FORECAST_DAF.querySelector('.forecast__icon').src = weatherIcons[data.data[2].weather.code][data.data[2].weather.icon];
         FORECAST_DAF.querySelector('.forecast__icon').alt = data.data[2].weather.description;
     } catch {
         FORECAST_DAF.querySelector('.forecast__icon').src = weatherIcons[804]["c04d"];
@@ -358,30 +465,30 @@ async function getLinkToImage() {
         FORECAST_NEXT_DAY.querySelector('.forecast__icon').src = weatherIcons[804]["c04d"];
         FORECAST_NEXT_DAY.querySelector('.forecast__icon').alt = data.data[3].weather.description;
     }
-  };
-  getWeatherData(units);
+};
+getWeatherData(units);
 
-  async function getDateCity() {
+async function getDateCity() {
     let units = localStorage.getItem('units') === null ? 'M' : localStorage.getItem('units');
     let cityName = getValueInput();
     let loc = await getCoordinatesPlace(cityName);
-    if(loc === 'no result') {
+    if (loc === 'no result') {
         SEARCH_INPUT.placeholder = 'Incorrect data';
         SEARCH_INPUT.classList.add('search-field-error');
         SEARCH_INPUT.value = '';
     } else {
-        if(SEARCH_INPUT.classList.contains('search-field-error')) {
+        if (SEARCH_INPUT.classList.contains('search-field-error')) {
             SEARCH_INPUT.placeholder = 'Search city or ZIP';
             SEARCH_INPUT.classList.remove('search-field-error');
             SEARCH_INPUT.value = '';
         }
 
-        localStorage.setItem ("PlaceLocation", JSON.stringify(loc));
+        localStorage.setItem("PlaceLocation", JSON.stringify(loc));
         getWeatherData(units, loc);
     }
-  }
+}
 
-  async function getDate() {
+async function getDate() {
     let language = localStorage.getItem('lang') === null ? 'en' : localStorage.getItem('lang');
     let dateTime = localStorage.getItem('dateTime');
     let date = dateTime.split(',');
@@ -389,21 +496,31 @@ async function getLinkToImage() {
     let fullDateT = new Date(date[1]);
     let fullDateDAF = new Date(date[2]);
     let fullDateN = new Date(date[3]);
-    let dateDay = fullDate.toLocaleString(language, {weekday: 'short'});
-    let dateDayT = fullDateT.toLocaleString(language, {weekday: 'long'});
-    let dateDayDAF = fullDateDAF.toLocaleString(language, {weekday: 'long'});
-    let dateDayN = fullDateN.toLocaleString(language, {weekday: 'long'});
-    let day = fullDate.toLocaleString(language, {day: 'numeric'});
-    let dateMonth = fullDate.toLocaleString(language, {month: 'long'});
+    let dateDay = fullDate.toLocaleString(language, { weekday: 'short' });
+    let dateDayT = fullDateT.toLocaleString(language, { weekday: 'long' });
+    let dateDayDAF = fullDateDAF.toLocaleString(language, { weekday: 'long' });
+    let dateDayN = fullDateN.toLocaleString(language, { weekday: 'long' });
+    let day = fullDate.toLocaleString(language, { day: 'numeric' });
+    let dateMonth = fullDate.toLocaleString(language, { month: 'long' });
     DATE_TIME.childNodes[0].data = ' ';
     DATE_TIME.insertAdjacentHTML('afterbegin', `${dateDay} ${day} ${dateMonth}`);
     digitalWatch();
-    FORECAST_TOMORROW.querySelector('.forecast__day').innerHTML = dateDayT;
-    FORECAST_DAF.querySelector('.forecast__day').innerHTML = dateDayDAF;
-    FORECAST_NEXT_DAY.querySelector('.forecast__day').innerHTML = dateDayN;
-  }
+    if(language === "be") {
+        let today = new Date();
+        let monthValue = today.getMonth();
+        let dayValue = today.getDay();
+        DATE_TIME.childNodes[0].textContent = `${translations["be"].days.short[dayValue]} ${today.getDate()} ${translations["be"].month[monthValue]}`;
+        FORECAST_TOMORROW.querySelector('.forecast__day').innerHTML = translations["be"].days.long[fullDateT.getDay()];
+        FORECAST_DAF.querySelector('.forecast__day').innerHTML = translations["be"].days.long[fullDateDAF.getDay()];
+        FORECAST_NEXT_DAY.querySelector('.forecast__day').innerHTML = translations["be"].days.long[fullDateN.getDay()];
+    } else {
+        FORECAST_TOMORROW.querySelector('.forecast__day').innerHTML = dateDayT;
+        FORECAST_DAF.querySelector('.forecast__day').innerHTML = dateDayDAF;
+        FORECAST_NEXT_DAY.querySelector('.forecast__day').innerHTML = dateDayN;
+    }
+}
 
-  function digitalWatch() {
+function digitalWatch() {
     let date = new Date();
     let hours = date.getHours();
     let minutes = date.getMinutes();
@@ -413,24 +530,23 @@ async function getLinkToImage() {
     if (seconds < 10) seconds = "0" + seconds;
     CLOCK.innerHTML = (hours + ":" + minutes + ":" + seconds);
     setTimeout("digitalWatch()", 1000);
-  }
-  digitalWatch();
+}
+digitalWatch();
 
-  function ConvertDDToDMS(dd) {
+function ConvertDDToDMS(dd) {
     var deg = dd | 0;
     var frac = Math.abs(dd - deg);
     var min = (frac * 60) | 0;
     var sec = frac * 3600 - min * 60;
     return deg + "° " + min + "' " + Math.round(sec) + "\"";
-  };
-  
-  function getValueInput() {
+};
+
+function getValueInput() {
     let cityName = SEARCH_INPUT.value;
     return cityName;
-  }
-
-  
-  
+}
 
 
-  
+
+
+
