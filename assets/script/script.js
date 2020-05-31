@@ -203,6 +203,7 @@ const CITY = document.querySelector('.weather-data-cluster__location');
 const SEARCH_INPUT = document.querySelector('.control-unit__search-input-input');
 const SEARCH_BTN = document.querySelector('.control-unit__search-input__button');
 const ADVICE_FORM = document.querySelector('.control-unit__search-input__advice');
+const MICRO_BTN = document.querySelector('.control-unit__search-input__voice-button');
 let units = localStorage.getItem('units') === null ? 'M' : localStorage.getItem('units');
 let language = localStorage.getItem('lang') === null ? 'en' : localStorage.getItem('lang');
 
@@ -544,7 +545,61 @@ function ConvertDDToDMS(dd) {
 function getValueInput() {
     let cityName = SEARCH_INPUT.value;
     return cityName;
+};
+
+window.SpeechRecognition = window.SpeechRecognition || window.
+    webkitSpeechRecognition;
+
+if(SpeechRecognition) {
+    console.log('Your Browser supports speech Recognition');
+
+    const recognition = new SpeechRecognition();
+    recognition.interimResults = true;
+
+MICRO_BTN.addEventListener('click', () => {
+    let language = localStorage.getItem('lang') === null ? 'en' : localStorage.getItem('lang');
+    
+    if(MICRO_BTN.classList.contains('off')) {
+        MICRO_BTN.classList.remove('off');
+        recognition.start();
+    } else {
+        MICRO_BTN.classList.add('off');
+        recognition.stop();
+    }
+
+    if(language === 'en') {
+        recognition.lang = 'en-US';
+    } else {
+        recognition.lang = 'ru-RU';
+    }
+
+    recognition.addEventListener('start', e => {
+        console.log('Speech Recognition Active');
+    });
+
+    recognition.addEventListener('end', e => {
+        console.log('Speech Recognition Disconnected');
+        MICRO_BTN.classList.add('off');
+    });
+
+    recognition.addEventListener('result', e => {
+        const transcript = Array.from(e.results)
+            .map(result => result[0])
+            .map(result => result.transcript)
+            .join('');
+        
+        SEARCH_INPUT.value =  transcript;
+        setTimeout(() => {
+            SEARCH_BTN.click();
+        }, 750);
+    });
+});
+} else {
+    console.log('Your Browser does not support speech Recognition');
 }
+
+
+
 
 
 
