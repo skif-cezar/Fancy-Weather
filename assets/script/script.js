@@ -555,22 +555,16 @@ if(SpeechRecognition) {
 
     const recognition = new SpeechRecognition();
     recognition.interimResults = true;
+    recognition.lang = 'ru-RU';
 
 MICRO_BTN.addEventListener('click', () => {
-    let language = localStorage.getItem('lang') === null ? 'en' : localStorage.getItem('lang');
-    
+
     if(MICRO_BTN.classList.contains('off')) {
         MICRO_BTN.classList.remove('off');
         recognition.start();
     } else {
         MICRO_BTN.classList.add('off');
         recognition.stop();
-    }
-
-    if(language === 'en') {
-        recognition.lang = 'en-US';
-    } else {
-        recognition.lang = 'ru-RU';
     }
 
     recognition.addEventListener('start', e => {
